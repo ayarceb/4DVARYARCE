@@ -1,0 +1,5 @@
+! current ensemble number:
+ensemble.id  : 7
+
+!Factor Applied to depositions
+deposition.adhoc.factor.nox  :  1.890573 
