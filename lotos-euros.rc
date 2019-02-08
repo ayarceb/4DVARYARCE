@@ -1,0 +1,677 @@
+
+! ======================================================================
+! ===
+! === LOTOS-EUROS run description
+! ===
+! === Default settings for v2.0.001
+! ===
+! ======================================================================
+
+! ######################################################################
+! ###
+! ### HelP ! (if needed ...)
+! ###
+! ######################################################################
+
+
+! 
+! For help on the format of this file, see the rcfile documentation in:
+!
+!   rcget --doc
+!
+! The 'rcget' script is probably located next to the 'rc.py' module
+! that accompanies the the model setup script.
+!
+  
+
+
+! ######################################################################
+! ###
+! ### setting
+! ###
+! ######################################################################
+
+
+!-------------------------------------------------
+! ensemble settings
+!-------------------------------------------------
+
+! adhoc settings from ensemble written from matlab;
+! this will defined the following keys:
+!
+!      ! ensemble number:
+!      ensemble.id          :  12
+!
+!      ! factor for depos:
+!      deposition.adhoc.factor.nox    : 1.2345
+!
+#include ensemble-settings.rc
+
+
+! ------------------------------------------------
+! run description
+! ------------------------------------------------
+
+! run description:
+run.description    :  LOTOS-EUROS ${my.model.release}.${my.patch.nr}
+
+! project description:
+run.project        :  LOTOS-EUROS
+
+! short id for directory names etc:
+! RUNDIR is the name of the run directory read from STDIN
+! during the execution of newrun
+! NP - 20180105
+!run.id             :  2016_OMI
+!run.id             :  Vd_no2_fac_1.6
+!run.id             :  D4_LUOR
+run.id              :  Model_test_code1_4DEnVAR
+
+! subdir in project scratch:
+!my.subdir          :  ${run.id}/${COMPILER_SUITE}
+my.subdir          :  ${run.id}/ens-${ensemble.id}
+
+
+
+
+! ----------------------------------------
+! build and run directories
+! ----------------------------------------
+
+! The code is copied to and compiled in a 'build' directory,
+! and the run, output, and restart are placed next to it:
+!
+!   <run.project.dir> / build
+!                     / run
+!                     / output
+!                     / restart
+!                    
+! Define this project directory here, eventually use
+! the 'my.scratch' variable (defined in machine.rc):
+!
+! base directory for build/run/etc : choose an appropriate run
+! directory on a scratch disk, or use ${my.scratch} 
+my.project.dir      :  ${my.scratch}/projects/${run.project}/${my.subdir}
+
+
+! ----------------------------------------
+! compile flags
+! ----------------------------------------
+
+! keys to select compiler flags; see compiler.*.rc for all values:
+! ---
+!optim-none check-all    : Use for testing. Full model check on NaN, not allocated variables etc. (model will be very slow
+optim-fast              : Use for normal runs. Compiler uses optimal calculation settings (model very fast). Use this for normal runs
+! optim-fast optim strict : Use for comparing tow model runs, which should be exactly the same. 
+! ---
+!my.build.configure.flags      :  optim-none check-all debug
+!my.build.configure.flags      :  optim-none check-all
+!my.build.configure.flags      :  optim-fast optim-strict
+my.build.configure.flags      :  optim-fast
+
+
+! ----------------------------------------
+! machine specific stuff (compiler name & flags, lib paths, ... )
+! ----------------------------------------
+
+! machine specific settings:
+!my.machine.rc       :  machine-template.rc
+!my.machine.rc       :  machine-tno-hpc.rc
+!my.machine.rc       :  machine-eafit-kalman.rc
+my.machine.rc       :  machine-eafit-dirac.rc
+
+! include settings:
+!#include base/${my.patch.nr}/rc/${my.machine.rc}
+#include proj/colombia/${my.patch.nr}/rc/${my.machine.rc}
+
+
+! ----------------------------------------
+! expert settings
+! ----------------------------------------
+
+! include expert settings to build source code
+#include base/${my.patch.nr}/rc/lotos-euros-expert.rc
+
+
+! ######################################################################
+! ###
+! ### source code
+! ###
+! ######################################################################
+
+
+! ----------------------------------------
+! version
+! ----------------------------------------
+
+! base number:
+my.model.release  :  v2.0
+
+! patch number:
+my.patch.nr       :  001
+
+
+! ----------------------------------------
+! source directories
+! ----------------------------------------
+
+! The code that will be compiled is collected from one
+! or more source directories. A list with the directories
+! should be provided, e.g.:
+!
+!   my.source.dirs  :  base/000 proj/newemis proj/mytest ...
+!
+! The content of the'src', 'bin', and other subdirs of 
+! these directories is copied to the build directory,
+! in the specified order. Thus, in this example, the files
+! in 'proj/newemis/src/' will replace those copied from
+! 'base/000/src' etc.
+!
+my.source.dirs      :  base/${my.patch.nr} \
+                       proj/colombia/${my.patch.nr}
+
+
+! ----------------------------------------
+! parallelisation
+! ----------------------------------------
+
+! ~ openmp
+
+! enable OpenMP (True|False) ?
+par.openmp   :  False
+
+! number of threads:
+par.nthread  :  8
+
+! ~ mpi 
+
+! enable MPI (True|False) ?
+! (only used for coupling serial models)
+par.mpi      :  False
+
+! number of mpi tasks (always 1):
+par.ntask    :  1
+
+
+
+! ######################################################################
+! ###
+! ### run settings : modify if necessary !
+! ###
+! ######################################################################
+
+!
+! --> All settings that setup your simulation.
+!
+
+! ----------------------------------------
+! time
+! ----------------------------------------
+
+
+! timerange:
+timerange.start     :  2016-07-01 00:00:00
+timerange.end       :  2016-07-08 3:00:00
+
+! output time step in minutes:
+timestep.output     :   180
+
+
+! ----------------------------------------
+! horizontal grid
+! ----------------------------------------
+
+! 
+! ~ either select one of the pre-defined grids:
+!
+
+!grid.name         : MACC
+!grid.name         : MACC-II
+!grid.name         : NL-smogprog
+!grid.name         : wrrd02
+
+!! grid definitions:
+!#include base/${my.patch.nr}/rc/lotos-euros-regions.rc
+
+
+!
+! ~ or define the keys below ..
+!
+
+!
+! Colombia:  [-80,-65] x [-10,25]
+! size:         15     x    35     deg
+! @0.25x0.25:   60     x   140     cells
+!
+
+! ----------------------------------------
+! MAUI-specific domains
+! ----------------------------------------
+
+!FIRTS DOMAIN D01  [-84,-60] x [-8.5 ,18]
+!RESOLUTION: 0.27 x 0.27
+!CELLS: 87 x 97
+
+!SECOND DOMAIN D02  [-80.5,-70] x [2 ,11]
+!RESOLUTION: 0.09 x 0.09
+!CELLS: 117 x 100
+
+!THIRD DOMAIN D03  [-77.2,-73.9] x [5.2 ,8.9]
+!RESOLUTION: 0.03 x 0.03
+!CELLS: 110 x 124
+
+!FOURTH DOMAIN D04  [-76,-75] x [5.7 ,6.8]
+!RESOLUTION: 0.01 x 0.01
+!CELLS: 100 x 110
+
+!DOMAIN COLOMBIA Dcol  [-79.80,-65.94] x [-4.55,13.27]
+!RESOLUTION: 0.09 x 0.09
+!CELLS: 154 x 198
+
+! south west corner:
+grid.west         : -75.9
+grid.south        : 6.45
+! resolution: 
+grid.dlon         : 0.09
+grid.dlat         : 0.09
+! spacing:
+grid.nx           : 8
+grid.ny           : 11
+!
+! domain name in LEIP and other input:
+!my.leip.region     :  colombia_w85w60s15n30   !Meteo 0.14
+my.leip.region     :  colombia_w85w65s5n15    !Meteo 0.07
+!my.leip.region     :carib_w95w45s10n30       !Meteo 0.14 y Camsira
+
+
+! ----------------------------------------
+! vertical levels
+! ----------------------------------------
+
+! which type of model levels?
+!~ LE original:
+levels.type                :  mixlayer
+!!~ experimental:
+!levels.type                :  hybride_sigma_pressure
+
+! number of levels:
+!levels.nz           :  4
+levels.nz           :  5
+
+! mixlayer level definition, used by routine 'MixlayerVertexHeights' :
+!       :
+!  [ ------  top(5) ]
+! 
+!    ------  top(4)
+!       ___           "resid2"
+!    ---              "resid1"
+!       ___  blh
+!    __/              "max"
+!    ------  dsurf
+! -------------------
+!~ top of surface layer:
+mixlayer.surf_top              :  25.0
+! minimum top of mix layer:
+mixlayer.mix_topmin            :   50.0
+!~ top heights from 4th onwards ;
+! minimum thicknes of layers above mix,
+! and factors for orography std.dev. added to this:
+#if "${levels.nz}" == "4"
+mixlayer.top                   :  3500.0
+mixlayer.dmin                  :  500.0
+mixlayer.sdofac                :  1.0
+#elif "${levels.nz}" == "5"
+mixlayer.top                   :  3500.0 5000.0
+mixlayer.dmin                  :  500.0
+mixlayer.sdofac                :  1.0 0.5
+#else
+#error could not level tops for levels.nz "${levels.nz}"
+#endif
+! thickness of layer to hold aloft boundary conditions:
+mixlayer.daloft                :  1000.0
+
+
+! ----------------------------------------
+! data
+! ----------------------------------------
+
+! definition of model data fields, currently meteo:
+!#include base/${my.patch.nr}/rc/lotos-euros-data.rc
+#include proj/colombia/${my.patch.nr}/rc/lotos-euros-data.rc
+
+
+! ----------------------------------------
+! meteo
+! ----------------------------------------
+
+! include detailed settings:
+
+
+
+
+!#if "${my.patch.nr}" =='colombia_w85w60s15n30'
+!#include base/${my.patch.nr}/rc/lotos-euros-meteo-ecmwf.rc
+!#include base/${my.patch.nr}/rc/lotos-euros-meteo-ecmwf_orog.rc
+!#else "${my.patch.nr}" =='colombia_w85w65s5n15'
+!#include base/${my.patch.nr}/rc/lotos-euros-meteo-ecmwf_new.rc
+#include base/${my.patch.nr}/rc/lotos-euros-meteo-ecmwf_new_orog.rc
+!#else "${my.patch.nr}" =='carib_w95w45s10n30'
+!#include base/${my.patch.nr}/rc/lotos-euros-meteo-ecmwf_caribe.rc
+!#include base/${my.patch.nr}/rc/lotos-euros-meteo-ecmwf_caribe_orog.rc
+!#endif
+
+
+
+! ----------------------------------------
+! input collection
+! ----------------------------------------
+
+! location of LEIP produced input,
+! region name is defined together with grid:
+my.leip.dir        :  ${my.data.dir}/LEIP/${my.leip.region}
+
+
+
+! ######################################################################
+! ###
+! ### tracers
+! ###
+! ######################################################################
+
+
+! Keywords to select tracers and reactions,
+! in the tables found in the "groups" column.
+! Group names supported by default (see expert.rc) :
+!
+!   cbm4              :  tracers/reactions of CBM4 scheme
+!   sulphur           :  sulphur-only scheme (SO2 and SO4a, OH read)
+!   methane           :  methane-only scheme (CH4, OH read)
+!   co2               :  CO2 tracer
+!   sf6               :  SF6 tracer
+!   ppm               :  primary particulate matter
+!   ec                :  elementary carbon
+!   pom               :  primary organic matter
+!   sia               :  secondary inorganic aerosols
+!   seasalt           :  sodium aerosols representing seasalt
+!   dust              :  dust aerosols
+!
+!   NB. for secondary organic aerosol you need both 'vbs' and 'soa'
+!   soa               :  TERP reactions used as input to VBS
+!   vbs               :  VBS tracers, TERP reactions used as input to VBS
+! 
+!   basecation        :  base-cat-ion aerosols
+!   hm                :  heavy metals
+!
+!   accum             :  accumulated species
+!   biascorr          :  bias corrected species
+!
+! selected tracer groups:
+genes.group.selected          : cbm4 ppm ec pom sia seasalt dust accum biascorr
+
+
+! skip some of the tracers ?
+! (only used to check backwards compatibility):
+genes.tracers.skip            :   
+
+
+
+! ######################################################################
+! ###
+! ### sinks
+! ###
+! ######################################################################
+
+! ----------------------------------------
+! dry deposition
+! ----------------------------------------
+
+! compute ozone flux specials (T|F) ?
+deposition.ozone_flux_specials   :  F
+
+! NH4+/H+ ratio 
+! File created from budget output 'drynhx' 
+! from a run with gamma_water set to zero.
+! ~ zero gamma_water for production of the 'drynhx' budgets:
+deposition.gammawater.file  :  zero
+! ~ actual file:
+!deposition.gammawater.file  :  ${my.data.dir}/ammonium/v3/gammawater_w30e56n29n70_050x025.nc
+
+
+! ----------------------------------------
+! wet deposition
+! ----------------------------------------
+
+! wet deposition scheme:
+le.wet_depos.type         :  EMEP
+!le.wet_depos.type         :  CAMx
+
+! data file with properties for wet deposition routine for CAMx
+le.wet_depos.CAMx.datafile  : ${my.data.dir}/wet_depos/CAMx/depos_data_camx.csv
+
+
+
+! ######################################################################
+! ###
+! ### emissions
+! ###
+! ######################################################################
+
+! List of available emissions:
+
+!     macc_ii          :   MACC-II  2005-2009   (NOTE: no PM composition tables taken from MACC-I !)
+!     macc_iii          :  MACC-III 2007-2011   
+!     edgar            :   global inventory
+
+! ~ biogenic:
+!   ~ vegetation emissions, choose one of:
+!       bio            :   isoprene and terpene emissions
+!       megan          :   MEGAN bio emis model, instead of "bio"
+!   ~ for NOx emissions
+!     	bio-no         :   parametrization by Yienger and Levy 
+! ~ natural:
+!     sea_salt
+!     dust-wind
+!     dust-resuspension
+!     dust-agriculture
+! ~ fires:
+!     fire_macc
+!     fire_silam
+! ~ testing:
+!     point           : single point source
+!
+le.emis.sets         :  edgar \
+                        megan \
+                        bio-no \
+                        sea_salt \
+                        dust-wind \
+                        fire_macc
+
+!le.emis.sets         :  sea_salt
+                            
+                        
+! details per set:
+!~ latest set including settings for MACC-III emissions:
+!#include base/${my.patch.nr}/rc/lotos-euros-emissions-v4.rc
+#include proj/colombia/${my.patch.nr}/rc/lotos-euros-emissions-v4.rc
+
+
+! ######################################################################
+! ###
+! ### land use / vegetation
+! ###
+! ######################################################################
+
+! which data set ?
+!my.landuse  : smiatek
+my.landuse  : glc
+
+! Use Corine Landcover 2006? This landuse will overwrite the others for locations available in this file
+my.landuse.clc2006.enabled    : F
+
+! Landuse accumulation types for stomatal ozone deposition
+le.landuse.accumulation.types        : 
+!le.landuse.accumulation.types        : Wheat Beech Spruce Clover
+
+! include detailed settings:
+!#include base/${my.patch.nr}/rc/lotos-euros-landuse.rc
+!#include proj/colombia/${my.patch.nr}/rc/lotos-euros-landuse-colombia.rc
+#include proj/colombia/${my.patch.nr}/rc/lotos-euros-landuse-colombia_eafit.rc
+
+! ######################################################################
+! ###
+! ### boundary conditions
+! ###
+! ######################################################################
+
+!
+! Boundaries are filled from a number of sources:
+!  ~~ climatologies:
+!   clim-isak    : output from 2D Isaksen model
+!   clim-const   : constant values for some aerosols, heavy-metals, and pops
+!   clim-logan   : Logan ozone climatology
+!   clim-emep    : EMEP report
+!   clim-steady  : apply steady state to o3/no/no2
+!  ~~ CAMS global CTM
+!   data         : use le_data structures to read and remap
+!                  boundary conditions from netcdf files
+!  ~~ LOTOS-EUROS boundary conditions:
+!   le           : output from previous LOTOS-EUROS run (conc-bound files)
+!
+! collected climatology boundary conditions:
+my.bound.clims    : clim-const clim-steady
+!
+! Provide a list with sources to apply; later sources overwrite previous:
+!le.bound.types            :  ${my.bound.clims} data
+le.bound.types            :  ${my.bound.clims} data le
+!le.bound.types            :
+! ~~
+
+! details of climatologies:
+#include base/${my.patch.nr}/rc/lotos-euros-bound-clim.rc
+
+! netcdf files:
+!~ macc-nrt as produced by leip:
+!#include proj/colombia/${my.patch.nr}/rc/lotos-euros-bound-nc-cams-nrt-fmt1.rc
+!~ macc-nrt as produced by leip similar to meteo:
+!#include proj/colombia/${my.patch.nr}/rc/lotos-euros-bound-nc-cams-nrt-fmt2.rc
+!Camsira as produced by leip similar to meteo:
+#include proj/colombia/${my.patch.nr}/rc/lotos-euros-bound-camsira.rc
+!~ macc re-analysis (2003-2012):
+!#include base/${my.patch.nr}/rc/lotos-euros-bound-nc-macc-rea-fmt1.rc
+
+! ~~
+
+! If a run from Lotos-Euros is used as boundary,
+! specify the path/settings here:
+!le.bound.le.path          :  /data/output/myproject/myrunid
+!le.bound.le.key           :  model=LE;expid=myrunid;name=conc-bound
+!le.bound.le.key.labeling  :  model=LE;expid=myrunid;name=label-bound
+
+le.bound.le.path          : /run/media/dirac/Datos/scratch/projects/LOTOS-EUROS/DCOL_base_july_2017/output
+le.bound.le.key           :  model=LE;expid=DCOL_base_july_2017;name=conc-3d
+le.bound.le.key.labeling  :  model=LE;expid=DCOL_base_july_2017;name=label-bound
+
+
+
+
+
+
+
+! ######################################################################
+! ###
+! ### bias correction
+! ###
+! ######################################################################
+!
+! Surface ozone bias correction:
+!   'none'
+!   'o3_smogprog_v19'
+!   'o3_smogprog_v110'
+le.biascorr.surface_ozone     :  o3_smogprog_v110
+
+!
+! Total PM bias correction factor applied to total PM output and AOD.
+!
+!   1.0    : default, no 'none'
+!   2.0    : quite good approximation for the missing PM ..
+!
+!le.biascorr.total_pm.factor   :  1.0
+le.biascorr.total_pm.factor   :  2.0
+!
+!le.biascorr.aod.factor        :  1.0
+le.biascorr.aod.factor        :  1.6
+
+
+
+! ######################################################################
+! ###
+! ### output
+! ###
+! ######################################################################
+
+! settings for validation output:
+#include base/${my.patch.nr}/rc/lotos-euros-output.rc
+
+!
+! to have your own specific output, either:
+!  - create a new include file
+!  - copy the required content from the template to here
+!
+
+
+! ######################################################################
+! ###
+! ### restart
+! ###
+! ######################################################################
+
+! ~~ restore state from restart file ?
+
+! start from restart files (T|F) ?
+le.restart                    :  F
+
+! place where restart are read from;
+! file names : <model>_<expid>_<name>_<ccyymmdd>_<hhmm>.nc
+le.restart.path               :  ${my.project.dir}/restart
+le.restart.key                :  model=LE;expid=${run.id};name=state
+
+
+
+! ~~ save new restart files ?
+
+! write restart files (T|F) ? frequency in hours:
+le.restart.save               :  T
+le.restart.save.dhour         :  24.0
+
+! place where restart files are written to;
+! file names : <model>_<expid>_<name>_<ccyymmdd>_<hhmm>.nc
+le.restart.save.path          :  ${my.project.dir}/restart
+le.restart.save.key           :  model=LE;expid=${run.id};name=state
+
+! setting to ensure creatation of restart files directory,
+! need to include 'le.restart' in 'install.tasks' list:
+le.restart.install.dir       :  ${le.restart.save.path}
+
+
+! ######################################################################
+! ###
+! ### forecasts
+! ###
+! ######################################################################
+
+
+! run in forecast mode (T|F) ?
+! (thus, read forecast meteo series)
+forecast.mode    :  F
+
+! detailed settings:
+#include base/${my.patch.nr}/rc/lotos-euros-forecast.rc
+
+
+
+! ######################################################################
+! ###
+! ### end
+! ###
+! ######################################################################
+
